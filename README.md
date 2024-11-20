@@ -1,7 +1,7 @@
 # tehfiles
 ##### File storing and simple analytics
 
-Simple API with ability to store uploaded files in storage and retrieve simple analytics.
+Simple API with ability to store uploaded files to storage and get simple analytics.
 
 For local storage [MinIO](https://min.io/) is used. The good thing that you can use 
 [boto3](https://boto3.amazonaws.com/v1/documentation/api/latest/index.html) with Minio,
@@ -14,7 +14,7 @@ so you can switch to AWS S3 if needed.
 
 ```
 s3_local_access_key="s3_local_access_key"
-s3_local_secret_key="s3_local_access_key"
+s3_local_secret_key="s3_local_secret_key"
 
 postgres_user="postgres"
 postgres_password="postgres"
@@ -30,7 +30,7 @@ export $(xargs <.env)
 Since we are using MinIO as our storage - the first thing is to setup a new bucket for our app.
 Run:
 ```commandline
- docker compose up minio 
+ docker compose up 
 ```
 Now we can go to [MinIO UI](localhost:9001):
 
@@ -47,14 +47,10 @@ pawd -> s3_local_secret_key
 And go to [buckets/add-bucket](http://localhost:9001/buckets/add-bucket) to add new bucket with name: `default-bucket`.
 Which is already in app settings. 
 
-#### Run 
+#### API 
 
-After setting up new bucket in MinIO we can start our API along with other services:
-
-```commandline
- docker compose up
-```
-And after services have started - try our [API](http://localhost:9002/docs):
+After setting up new bucket in MinIO we can start using our API:
+[API](http://localhost:9002/docs):
 ```
 http://localhost:9002/docs
 ```
