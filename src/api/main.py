@@ -16,6 +16,7 @@ async def create_tables():
         logger.error(f"Error during table creation: {e}")
         raise e
 
+
 logger = logging.getLogger(__name__)
 
 app = FastAPI()

@@ -32,9 +32,11 @@ class StorageHandle:
             )
             return response
         except ClientError as e:
-            error_code = e.response['Error']['Code']
-            if error_code == 'NoSuchBucket':
-                logger.error(f"Error: The bucket '{settings.s3_default_bucket_name}' does not exist.")
+            error_code = e.response["Error"]["Code"]
+            if error_code == "NoSuchBucket":
+                logger.error(
+                    f"Error: The bucket '{settings.s3_default_bucket_name}' does not exist."
+                )
             else:
                 logger.error(f"An unexpected error occurred: {e}")
             raise
@@ -50,11 +52,15 @@ class StorageHandle:
             )
             data.seek(0)
         except ClientError as e:
-            error_code = e.response['Error']['Code']
-            if error_code == 'NoSuchBucket':
-                logger.error(f"Error: The bucket '{settings.s3_default_bucket_name}' does not exist.")
-            elif error_code == 'NoSuchKey':
-                logger.error(f"Error: The file with key '{key}' does not exist in the bucket.")
+            error_code = e.response["Error"]["Code"]
+            if error_code == "NoSuchBucket":
+                logger.error(
+                    f"Error: The bucket '{settings.s3_default_bucket_name}' does not exist."
+                )
+            elif error_code == "NoSuchKey":
+                logger.error(
+                    f"Error: The file with key '{key}' does not exist in the bucket."
+                )
             else:
                 logger.error(f"An unexpected error occurred: {e}")
             return None
@@ -67,9 +73,11 @@ class StorageHandle:
             )
             return resp
         except ClientError as e:
-            error_code = e.response['Error']['Code']
-            if error_code == 'NoSuchBucket':
-                logger.error(f"Error: The bucket '{settings.s3_default_bucket_name}' does not exist.")
+            error_code = e.response["Error"]["Code"]
+            if error_code == "NoSuchBucket":
+                logger.error(
+                    f"Error: The bucket '{settings.s3_default_bucket_name}' does not exist."
+                )
             else:
                 logger.error(f"An unexpected error occurred: {e}")
             return None

@@ -77,7 +77,8 @@ async def upload_file(
     except Exception as e:
         logger.error(f"Failed to upload file: {file.filename}. Error: {e}")
         raise HTTPException(
-            status_code=400, detail=f"Failed to upload file: {file.filename}. Error: {e}"
+            status_code=400,
+            detail=f"Failed to upload file: {file.filename}. Error: {e}",
         )
 
     await create_new_file_record(
@@ -101,7 +102,9 @@ async def list_all(storage_handle=Depends(get_storage_handle)):
 @router.get("/last_uploaded/")
 async def last_uploaded(db=Depends(get_db)):
     """Returns the last uploaded file metadata"""
-    last_upload = await get_last_updated_file_record(db, settings.s3_default_bucket_name)
+    last_upload = await get_last_updated_file_record(
+        db, settings.s3_default_bucket_name
+    )
     if not last_upload:
         raise HTTPException(status_code=404, detail="No files have been uploaded yet.")
     return {"results": last_upload.__dict__}
@@ -122,7 +125,9 @@ async def one_random_line(
     if not accept:
         raise HTTPException(status_code=404, detail="Header is missing: accept")
 
-    last_upload = await get_last_updated_file_record(db, settings.s3_default_bucket_name)
+    last_upload = await get_last_updated_file_record(
+        db, settings.s3_default_bucket_name
+    )
 
     if not last_upload:
         raise HTTPException(status_code=404, detail="No files have been uploaded yet.")
