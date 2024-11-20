@@ -6,6 +6,7 @@ Simple API with ability to store uploaded files in storage and retrieve simple a
 For local storage [MinIO](https://min.io/) is used. The good thing that you can use 
 [boto3](https://boto3.amazonaws.com/v1/documentation/api/latest/index.html) with Minio,
 so you can switch to AWS S3 if needed.
+
 -------
 ## Usage
 
