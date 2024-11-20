@@ -1,0 +1,7 @@
+boto3
+fastapi
+psycopg2-binary
+pydantic-settings
+python-multipart
+SQLAlchemy
+uvicorn
