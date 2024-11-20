@@ -1,4 +1,7 @@
+import asyncio
 import logging
+
+import io
 
 import boto3
 
@@ -19,12 +22,25 @@ class StorageHandle:
             aws_secret_access_key=secret_key,
         )
 
+    def _upload_file_sync(self, file_data: bytes, bucket_name: str, object_key: str):
+        return self.client.upload_fileobj(file_data, bucket_name, object_key)
+
     async def upload_file(self, file_data, bucket_name, object_key):
         try:
-            response = self.client.upload_fileobj(file_data, bucket_name, object_key)
+            response = await asyncio.to_thread(
+                self._upload_file_sync, file_data, bucket_name, object_key
+            )
             return response
         except Exception as e:
             raise HTTPException(status_code=500, detail=str(e))
+
+    async def download_file_data(self, key: str):
+        data = io.BytesIO()
+        await asyncio.to_thread(self.client.download_fileobj,
+                                Bucket=settings.s3_default_bucket_name, Key=key, Fileobj=data
+                                )
+        data.seek(0)
+        return data
 
 
 def create_storage_handle(

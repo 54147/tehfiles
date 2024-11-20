@@ -1,4 +1,5 @@
-import io
+import asyncio
+
 import random
 import logging
 
@@ -76,7 +77,7 @@ async def upload_file(
             file.file, settings.s3_default_bucket_name, file.filename
         )
     except Exception as e:
-        logger.error(f"Failed to upload file: {file.filename}")
+        logger.error(f"Failed to upload file: {file.filename}. Error: {e}")
         raise HTTPException(
             status_code=400, detail=f"Failed to upload file: {file.filename}"
         )
@@ -91,7 +92,8 @@ async def upload_file(
 @router.get("/list_all/")
 async def list_all(storage_handle=Depends(get_storage_handle)):
     """Lists all the files that are now in storage"""
-    resp = storage_handle.client.list_objects_v2(Bucket=settings.s3_default_bucket_name)
+    resp = await asyncio.to_thread(storage_handle.client.list_objects_v2,
+                                   Bucket=settings.s3_default_bucket_name)
 
     if not resp.get("Contents"):
         raise HTTPException(status_code=404, detail="No files have been uploaded yet.")
@@ -128,11 +130,7 @@ async def one_random_line(
     if not last_upload:
         raise HTTPException(status_code=404, detail="No files have been uploaded yet.")
 
-    data = io.BytesIO()
-    storage_handle.client.download_fileobj(
-        Bucket=settings.s3_default_bucket_name, Key=last_upload.key, Fileobj=data
-    )
-    data.seek(0)
+    data = await storage_handle.download_file_data(key=last_upload.key)
 
     if not data:
         logger.error(
@@ -198,11 +196,7 @@ async def one_random_line_backwards(
     if not random_file:
         raise HTTPException(status_code=404, detail="No files have been uploaded yet.")
 
-    data = io.BytesIO()
-    storage_handle.client.download_fileobj(
-        Bucket=settings.s3_default_bucket_name, Key=random_file.key, Fileobj=data
-    )
-    data.seek(0)
+    data = await storage_handle.download_file_data(key=random_file.key)
 
     if not data:
         logger.error(
@@ -241,11 +235,7 @@ async def twenty_longest_lines(
     if not file_to_search:
         raise HTTPException(status_code=404, detail="No files have been uploaded yet.")
 
-    data = io.BytesIO()
-    storage_handle.client.download_fileobj(
-        Bucket=settings.s3_default_bucket_name, Key=file_to_search.key, Fileobj=data
-    )
-    data.seek(0)
+    data = await storage_handle.download_file_data(key=file_to_search.key)
 
     if not data:
         logger.error(
