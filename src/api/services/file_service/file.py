@@ -93,7 +93,7 @@ async def list_all(storage_handle=Depends(get_storage_handle)):
     """Lists all the files that are now in storage"""
     resp = await storage_handle.list_all_files()
 
-    if not resp:
+    if not resp or not resp.get("Contents"):
         raise HTTPException(status_code=404, detail="No files have been uploaded yet.")
 
     return {"results": [fo for fo in resp["Contents"]]}
