@@ -6,8 +6,8 @@ services:
       - "9000:9000"
       - "9001:9001"
     environment:
-      MINIO_ROOT_USER: s3_local_access_key
-      MINIO_ROOT_PASSWORD: s3_local_secret_key
+      MINIO_ROOT_USER: ${s3_local_access_key}
+      MINIO_ROOT_PASSWORD: ${s3_local_secret_key}
     volumes:
       - minio-data:/data
     command: server /data --console-address ":9001"
@@ -19,9 +19,9 @@ services:
     ports:
       - "5432:5432"
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=db
+      - POSTGRES_USER=${postgres_user}
+      - POSTGRES_PASSWORD=${postgres_password}
+      - POSTGRES_DB=${postgres_db}
 
   fastapi:
     build:
@@ -35,13 +35,13 @@ services:
       - postgres
     environment:
       s3_url: "http://minio:9000"
-      s3_access_key: s3_local_access_key
-      s3_secret_key: s3_local_secret_key
+      s3_access_key: ${s3_local_access_key}
+      s3_secret_key: ${s3_local_secret_key}
       pg_host: postgres
       pg_port: 5432
-      pg_user: postgres
-      pg_password: postgres
-      pg_db: db
+      pg_user: ${postgres_user}
+      pg_password: ${postgres_password}
+      pg_db: ${postgres_db}
 
 volumes:
   minio-data:
