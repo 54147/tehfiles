@@ -92,8 +92,9 @@ async def upload_file(
 @router.get("/list_all/")
 async def list_all(storage_handle=Depends(get_storage_handle)):
     """Lists all the files that are now in storage"""
-    resp = await asyncio.to_thread(storage_handle.client.list_objects_v2,
-                                   Bucket=settings.s3_default_bucket_name)
+    resp = await asyncio.to_thread(
+        storage_handle.client.list_objects_v2, Bucket=settings.s3_default_bucket_name
+    )
 
     if not resp.get("Contents"):
         raise HTTPException(status_code=404, detail="No files have been uploaded yet.")

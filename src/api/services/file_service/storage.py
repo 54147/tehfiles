@@ -36,9 +36,12 @@ class StorageHandle:
 
     async def download_file_data(self, key: str):
         data = io.BytesIO()
-        await asyncio.to_thread(self.client.download_fileobj,
-                                Bucket=settings.s3_default_bucket_name, Key=key, Fileobj=data
-                                )
+        await asyncio.to_thread(
+            self.client.download_fileobj,
+            Bucket=settings.s3_default_bucket_name,
+            Key=key,
+            Fileobj=data,
+        )
         data.seek(0)
         return data
 
