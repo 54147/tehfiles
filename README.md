@@ -21,6 +21,11 @@ postgres_password="postgres"
 postgres_db="db"
 ```
 
+And then run:
+```commandline
+export $(xargs <.env)
+```
+
 #### MinIO setup
 Since we are using MinIO as our storage - the first thing is to setup a new bucket for our app.
 Run:
@@ -53,3 +58,6 @@ And after services have started - try our [API](http://localhost:9002/docs):
 ```
 http://localhost:9002/docs
 ```
+
+------
+
