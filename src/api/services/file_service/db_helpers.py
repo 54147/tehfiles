@@ -18,19 +18,21 @@ def create_new_file_record(db, bucket_name, filename, file_size_bytes):
 
 
 def get_last_updated_file_record(db, bucket_name):
-    last_uploaded_file = (db.query(FileUploadPG)
-                          .filter(FileUploadPG.bucket_name == bucket_name)
-                          .order_by(FileUploadPG.upload_date.desc())
-                          .limit(1)
-                          .first())
+    last_uploaded_file = (
+        db.query(FileUploadPG)
+        .filter(FileUploadPG.bucket_name == bucket_name)
+        .order_by(FileUploadPG.upload_date.desc())
+        .limit(1)
+        .first()
+    )
 
     return last_uploaded_file
 
 
 def optimized_random(db):
-    return db.query(FileUploadPG.key).offset(
-            func.floor(
-                func.random() *
-                db.query(func.count(FileUploadPG.id))
-            )
-        ).limit(1).first()
+    return (
+        db.query(FileUploadPG.key)
+        .offset(func.floor(func.random() * db.query(func.count(FileUploadPG.id))))
+        .limit(1)
+        .first()
+    )

@@ -11,4 +11,3 @@ class FileUploadPG(Base):
     key = Column(String, nullable=False)
     file_size_bytes = Column(Integer, nullable=False)
     upload_date = Column(DateTime, nullable=False)
-

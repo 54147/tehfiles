@@ -5,7 +5,6 @@ from fastapi.responses import JSONResponse
 
 
 from src.api.database import engine, Base
-
 from src.api.services.file_service.file import router as file_router
 
 Base.metadata.create_all(engine)
@@ -28,7 +27,3 @@ async def catch_exceptions_middleware(request: Request, call_next):
             status_code=500,
             content={"detail": "An internal server error occurred"},
         )
-
-
-
-

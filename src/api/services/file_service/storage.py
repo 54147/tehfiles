@@ -13,10 +13,10 @@ logger.setLevel(logging.INFO)
 class StorageHandle:
     def __init__(self, endpoint_url: str, access_key: str, secret_key: str):
         self.client = boto3.client(
-            's3',
+            "s3",
             endpoint_url=endpoint_url,
             aws_access_key_id=access_key,
-            aws_secret_access_key=secret_key
+            aws_secret_access_key=secret_key,
         )
 
     async def upload_file(self, file_data, bucket_name, object_key):
@@ -28,9 +28,10 @@ class StorageHandle:
 
 
 def create_storage_handle(
-        endpoint_url: str = settings.s3_url,
-        access_key: str = settings.s3_access_key,
-        secret_key: str = settings.s3_secret_key,):
+    endpoint_url: str = settings.s3_url,
+    access_key: str = settings.s3_access_key,
+    secret_key: str = settings.s3_secret_key,
+):
     return StorageHandle(endpoint_url, access_key, secret_key)
 
 
