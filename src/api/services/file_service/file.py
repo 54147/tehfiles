@@ -84,6 +84,12 @@ async def last_uploaded(db=Depends(get_db)):
 
 @router.get("/one_random_line/")
 async def one_random_line(request: Request, db=Depends(get_db), storage_handle=Depends(get_storage_handle)):
+    """ Returns one random line from the last uploaded file as text/plain, application/json or application/xml
+    depending on the request accept header.
+    If the request is application/* please include following details in the response:
+    - line number
+    - file name
+    - the letter which occurs most often in this line"""
     accept = request.headers.get('accept')
 
     if not accept:
@@ -148,6 +154,7 @@ async def one_random_line(request: Request, db=Depends(get_db), storage_handle=D
 
 @router.get("/one_random_line_backwards/")
 async def one_random_line_backwards(db=Depends(get_db), storage_handle=Depends(get_storage_handle)):
+    """ Returns one random line from random uploaded file """
     random_file = optimized_random(db)
 
     if not random_file:
@@ -173,7 +180,9 @@ async def one_random_line_backwards(db=Depends(get_db), storage_handle=Depends(g
 
 
 @router.get("/20_longest_line_of_one_file/", response_model=LongestLinesResponse)
-async def twenty_longest_lines(random_file: bool = Query(False), db=Depends(get_db), storage_handle=Depends(get_storage_handle) ):
+async def twenty_longest_lines(random_file: bool = Query(False), db=Depends(get_db), storage_handle=Depends(get_storage_handle)):
+    """ Returns 20 longest lines from the last uploaded file. Returns from a random file if random_file is set to True."""
+
     if random_file:
         file_to_search = optimized_random(db)
     else:
