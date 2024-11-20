@@ -1,5 +1,3 @@
-import asyncio
-
 import random
 import logging
 
@@ -79,10 +77,10 @@ async def upload_file(
     except Exception as e:
         logger.error(f"Failed to upload file: {file.filename}. Error: {e}")
         raise HTTPException(
-            status_code=400, detail=f"Failed to upload file: {file.filename}"
+            status_code=400, detail=f"Failed to upload file: {file.filename}. Error: {e}"
         )
 
-    create_new_file_record(
+    await create_new_file_record(
         db, settings.s3_default_bucket_name, file.filename, file.size
     )
 
@@ -92,11 +90,9 @@ async def upload_file(
 @router.get("/list_all/")
 async def list_all(storage_handle=Depends(get_storage_handle)):
     """Lists all the files that are now in storage"""
-    resp = await asyncio.to_thread(
-        storage_handle.client.list_objects_v2, Bucket=settings.s3_default_bucket_name
-    )
+    resp = await storage_handle.list_all_files()
 
-    if not resp.get("Contents"):
+    if not resp:
         raise HTTPException(status_code=404, detail="No files have been uploaded yet.")
 
     return {"results": [fo for fo in resp["Contents"]]}
@@ -105,7 +101,7 @@ async def list_all(storage_handle=Depends(get_storage_handle)):
 @router.get("/last_uploaded/")
 async def last_uploaded(db=Depends(get_db)):
     """Returns the last uploaded file metadata"""
-    last_upload = get_last_updated_file_record(db, settings.s3_default_bucket_name)
+    last_upload = await get_last_updated_file_record(db, settings.s3_default_bucket_name)
     if not last_upload:
         raise HTTPException(status_code=404, detail="No files have been uploaded yet.")
     return {"results": last_upload.__dict__}
@@ -126,7 +122,7 @@ async def one_random_line(
     if not accept:
         raise HTTPException(status_code=404, detail="Header is missing: accept")
 
-    last_upload = get_last_updated_file_record(db, settings.s3_default_bucket_name)
+    last_upload = await get_last_updated_file_record(db, settings.s3_default_bucket_name)
 
     if not last_upload:
         raise HTTPException(status_code=404, detail="No files have been uploaded yet.")
@@ -192,7 +188,7 @@ async def one_random_line_backwards(
     db=Depends(get_db), storage_handle=Depends(get_storage_handle)
 ):
     """Returns one random line from random uploaded file"""
-    random_file = optimized_random(db)
+    random_file = await optimized_random(db)
 
     if not random_file:
         raise HTTPException(status_code=404, detail="No files have been uploaded yet.")
@@ -227,24 +223,26 @@ async def twenty_longest_lines(
     """Returns 20 longest lines from the last uploaded file. Returns from a random file if random_file is set to True."""
 
     if random_file:
-        file_to_search = optimized_random(db)
+        file_to_search = await optimized_random(db)
     else:
-        file_to_search = get_last_updated_file_record(
+        file_to_search = await get_last_updated_file_record(
             db, settings.s3_default_bucket_name
         )
 
     if not file_to_search:
         raise HTTPException(status_code=404, detail="No files have been uploaded yet.")
 
-    data = await storage_handle.download_file_data(key=file_to_search.key)
+    file_to_search = file_to_search.key
+
+    data = await storage_handle.download_file_data(key=file_to_search)
 
     if not data:
         logger.error(
-            f"File is missing in the storage: {settings.s3_default_bucket_name}/{file_to_search.key}"
+            f"File is missing in the storage: {settings.s3_default_bucket_name}/{file_to_search}"
         )
         raise HTTPException(
             status_code=404,
-            detail=f"File is missing in the storage: {file_to_search.key}",
+            detail=f"File is missing in the storage: {file_to_search}",
         )
 
     lines = [line.decode("utf-8") for line in data.readlines()]
@@ -253,6 +251,6 @@ async def twenty_longest_lines(
     longest_20_lines = sorted_lines[:20]
 
     return LongestLinesResponse(
-        file_key=file_to_search.key,
+        file_key=file_to_search,
         lines=[LongestLineItem(line_content=l) for l in longest_20_lines],
     )
