@@ -1,0 +1,48 @@
+services:
+  minio:
+    image: minio/minio
+    container_name: minio-container
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: s3_local_access_key
+      MINIO_ROOT_PASSWORD: s3_local_secret_key
+    volumes:
+      - minio-data:/data
+    command: server /data --console-address ":9001"
+
+  postgres:
+    image: postgres:16-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=db
+
+  fastapi:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    ports:
+      - "9002:9002"
+    restart: always
+    depends_on:
+      - minio
+      - postgres
+    environment:
+      s3_url: "http://minio:9000"
+      s3_access_key: s3_local_access_key
+      s3_secret_key: s3_local_secret_key
+      pg_host: postgres
+      pg_port: 5432
+      pg_user: postgres
+      pg_password: postgres
+      pg_db: db
+
+volumes:
+  minio-data:
+  postgres_data:
