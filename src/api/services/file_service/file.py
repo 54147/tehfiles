@@ -46,6 +46,12 @@ async def validate_file(file: UploadFile) -> bool:
     except ValueError:
         raise HTTPException(status_code=400, detail="File must have a valid extension.")
 
+    if file.size > settings.max_upload_size * 1024 * 1024:
+        raise HTTPException(
+            status_code=400,
+            detail=f"File is too large. The maximum allowed size is {settings.max_upload_size} MB.",
+        )
+
     if ext.lower() not in settings.allowed_extensions:
         raise HTTPException(
             status_code=400,

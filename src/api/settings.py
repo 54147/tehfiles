@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     s3_default_bucket_name: str = "default-bucket"
 
     allowed_extensions: list[str] = ["txt", "csv", "json"]
+    max_upload_size: int = 50  # 50 MB
 
     pg_host: str = "localhost"
     pg_port: int = 5432

@@ -55,5 +55,10 @@ After setting up new bucket in MinIO we can start using our API:
 http://localhost:9002/docs
 ```
 
+#### Limitations
+
+The max upload size for files is set to 50 mb in settings. 
+However, it can be changed via env var `max_upload_size`, the amount is in mb.
+
 ------
 
