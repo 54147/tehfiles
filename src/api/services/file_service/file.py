@@ -1,3 +1,4 @@
+import asyncio
 import random
 import logging
 
@@ -114,6 +115,49 @@ async def last_uploaded(db=Depends(get_db)):
     if not last_upload:
         raise HTTPException(status_code=404, detail="No files have been uploaded yet.")
     return {"results": last_upload.__dict__}
+
+
+async def fetch_bytes_from_storage(storage_handle, bucket: str, key: str, byte_range: tuple) -> bytes:
+    """Fetches a specific byte range from the storage"""
+    response = await asyncio.to_thread(storage_handle.client.get_object, Bucket=bucket, Key=key,
+                                       Range=f"bytes={byte_range[0]}-{byte_range[1]}")
+    return response['Body'].read()
+
+
+async def get_random_line_from_s3(storage_handle, bucket, key, file_size_bytes):
+    random_offset = random.randint(0, file_size_bytes - 1024)
+    byte_range = (random_offset, random_offset + 1023)
+
+    file_chunk = await fetch_bytes_from_storage(storage_handle, bucket, key, byte_range)
+
+    text_chunk = file_chunk.decode('utf-8', errors='ignore')
+
+    lines = text_chunk.splitlines()
+
+    if len(lines) > 1:
+        return random.choice(lines)
+    elif len(lines) == 1:
+        return lines[0]
+    else:
+        return await get_random_line_from_s3(storage_handle, bucket, key, file_size_bytes)
+
+
+@router.get("/bytes_random_line/")
+async def last_uploaded(db=Depends(get_db), storage_handle=Depends(get_storage_handle)):
+
+    random_file = await optimized_random(db)
+
+    if not random_file:
+        raise HTTPException(status_code=404, detail="No files have been uploaded yet.")
+
+    random_line = await get_random_line_from_s3(
+        storage_handle,
+        settings.s3_default_bucket_name,
+        random_file.key,
+        random_file.file_size_bytes
+    )
+
+    return {"random line": random_line}
 
 
 @router.get("/one_random_line/")
